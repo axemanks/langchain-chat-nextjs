@@ -5,6 +5,9 @@ import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import CircularProgress from '@mui/material/CircularProgress';
 
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
+
 export default function Home() {
 
   const [userInput, setUserInput] = useState("");
@@ -19,6 +22,8 @@ export default function Home() {
 
   const messageListRef = useRef(null);
   const textAreaRef = useRef(null);
+
+  const chat = new ChatOpenAI({ temperature: 0 });
 
   // Auto scroll chat to bottom
   useEffect(() => {
@@ -49,14 +54,24 @@ export default function Home() {
     setLoading(true);
     setMessages((prevMessages) => [...prevMessages, { "message": userInput, "type": "userMessage" }]);
 
-    // Send user question and history to API
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question: userInput, history: history }),
-    });
+// Send user question and history to API
+
+const response = await chat.call([
+  new HumanChatMessage(
+    "Translate this sentence from English to French. I love programming."
+  ),
+]);
+
+
+
+    
+    // const response = await fetch("/api/chat", {
+    //   method: "POST",
+    //   headers: {
+    //       "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ question: userInput, history: history }),
+    // });
 
     if (!response.ok) {
       handleError();
